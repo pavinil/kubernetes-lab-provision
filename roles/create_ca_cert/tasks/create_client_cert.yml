@@ -1,0 +1,56 @@
+- name: Create Folder
+  ansible.builtin.file:
+    path: "{{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}"
+    state: directory
+    mode: "700"
+
+- name: Verify If Certs Exist
+  ansible.builtin.find:
+    paths:
+      - "{{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}"
+    patterns:
+      - "*.crt"
+  register: matched_files
+
+- name: Generate Client Certificates
+  when: matched_files.files | map(attribute='path') | list | length == 0
+  block:
+    - name: Generate Client Config File
+      vars:
+        create_ca_cert_type: server
+      ansible.builtin.template:
+        src: "{{ role_path }}/templates/openssl_client.cnf.j2"
+        dest: "{{ role_path }}/files/openssl_{{ create_ca_cert_directory_name }}.cnf"
+        mode: "0700"
+
+    - name: Generate Client Private Key
+      ansible.builtin.command:
+        cmd: >
+          openssl genrsa -out {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.key 2048
+      register: output
+      failed_when: output.rc != 0
+      changed_when: output.rc != 0
+
+    - name: Create Client Certificate Signing Request
+      ansible.builtin.command:
+        cmd: >
+          openssl req -config {{ role_path }}/files/openssl_{{ create_ca_cert_directory_name }}.cnf
+          -key {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.key
+          -new -sha256 -out {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.csr
+      register: output
+      failed_when: output.rc != 0
+      changed_when: output.rc != 0
+
+    - name: Generate Certificate
+      ansible.builtin.command:
+        cmd: >
+          openssl x509 -req -days 3653
+          -in {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.csr
+          -copy_extensions copyall
+          -sha256 -CA {{ create_ca_cert_output_location }}/root/{{ create_ca_cert_root_name }}.crt
+          -CAkey {{ create_ca_cert_output_location }}/root/{{ create_ca_cert_root_name }}.key
+          -CAcreateserial
+          -out {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.crt
+      register: output
+      failed_when: output.rc != 0
+      changed_when: output.rc != 0

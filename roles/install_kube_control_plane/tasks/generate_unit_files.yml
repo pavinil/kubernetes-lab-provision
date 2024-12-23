@@ -1,0 +1,3 @@
+- name: Debug
+  ansible.builtin.debug:
+    msg: "{% set myList = [] %}{% for host in ansible_play_hosts %} {{ myList.append(host+'='+'https://'+hostvars[host]['ansible_facts']['enp1s0']['ipv4']['address']+':2380') }} {% endfor %} {{ myList|join(',') }}"

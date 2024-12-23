@@ -1,0 +1,58 @@
+- name: Create Folder
+  ansible.builtin.file:
+    path: "{{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}"
+    state: directory
+    mode: "700"
+
+- name: Verify If Certs Exist
+  ansible.builtin.find:
+    paths:
+      - "{{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}"
+    patterns:
+      - "*.crt"
+      - "*.key"
+  register: matched_files
+
+- name: Generate Kubeconfigs
+  when: matched_files.files | map(attribute='path') | list | length == 2 and create_ca_cert_directory_name is match('^(control.*|admin|kube-scheduler|kube-controller-manager|kube-proxy|worker.*)$')
+  block:
+    - name: Set Cluster
+      ansible.builtin.command:
+        cmd: >
+          kubectl config set-cluster {{ create_ca_cert_kube_cluster_name }}
+          --certificate-authority={{ create_ca_cert_output_location }}/root/{{ create_ca_cert_root_name }}.crt
+          --embed-certs=true
+          --server=https://kubernetes:6443
+          --kubeconfig={{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.kubeconfig
+      register: output
+      changed_when: output.rc != 0
+
+    - name: Set Credentials
+      ansible.builtin.command:
+        cmd: >
+          kubectl config set-credentials {{ create_ca_cert_directory_name }}
+          --client-certificate={{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.crt
+          --client-key={{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.key
+          --embed-certs=true
+          --kubeconfig={{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.kubeconfig
+      register: output
+      changed_when: output.rc != 0
+
+    - name: Set Context
+      ansible.builtin.command:
+        cmd: >
+          kubectl config set-context default
+          --cluster {{ create_ca_cert_kube_cluster_name }}
+          --user {{ create_ca_cert_params.common_name }}
+          --kubeconfig={{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.kubeconfig
+      register: output
+      changed_when: output.rc != 0
+
+    - name: Use Context
+      ansible.builtin.command:
+        cmd: >
+          kubectl config use-context default
+          --kubeconfig={{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.kubeconfig
+      register: output
+      changed_when: output.rc != 0
+

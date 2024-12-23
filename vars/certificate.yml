@@ -1,0 +1,123 @@
+create_ca_cert_output_location: certificates
+create_ca_cert_kube_cluster_name: kubenet
+create_ca_cert_root_name: kube-root-ca
+create_ca_cert_params: &DN
+  common_name: Kuberoot
+  country: IN
+  state: Tamilnadu
+  locality: Chennai
+  organization: Kubernetes
+  org_unit: Kubenet
+
+create_ca_cert_server_entities:
+  - name: kube-api-server
+    <<: *DN
+    common_name: kube-api-server
+    organization: Kubernetes
+    san: |
+      DNS.0 = kubernetes
+      DNS.1 = kubernetes.default
+      DNS.2 = kubernetes.default.svc
+      DNS.3 = kubernetes.default.svc.cluster
+      DNS.4 = kubernetes.default.svc.cluster.local
+      DNS.5 = kubernetes.kubenet
+      DNS.6 = control1
+      DNS.7 = control1.kubenet
+      DNS.8 = control2
+      DNS.9 = control2.kubenet
+      DNS.10 = control3.kubenet
+      DNS.11 = control3
+      IP.0 = 10.32.0.1
+      IP.1 = 192.168.100.100
+      IP.2 = 192.168.100.210
+      IP.3 = 192.168.100.211
+      IP.4 = 192.168.100.212
+      IP.5 = 127.0.0.1
+
+  - name: control1
+    <<: *DN
+    common_name: system:node:control1
+    organization: system:nodes
+    san: |
+      DNS.0 = control1
+      DNS.1 = control1.kubenet
+      IP.0 = 192.168.100.210
+  
+  - name: control2
+    <<: *DN
+    common_name: system:node:control2
+    organization: system:nodes
+    san: |
+      DNS.0 = control2
+      DNS.1 = control2.kubenet
+      IP.0 = 192.168.100.211
+
+  - name: control3
+    <<: *DN
+    common_name: system:node:control3
+    organization: system:nodes
+    san: |
+      DNS.0 = control3
+      DNS.1 = control3.kubenet
+      IP.0 = 192.168.100.212
+
+  - name: worker1
+    <<: *DN
+    common_name: system:node:worker1
+    organization: system:nodes
+    san: |
+      DNS.0 = worker1
+      DNS.1 = worker1.kubenet
+      IP.0 = 192.168.100.213
+  
+  - name: worker2
+    <<: *DN
+    common_name: system:node:worker2
+    organization: system:nodes
+    san: |
+      DNS.0 = worker2
+      DNS.1 = worker2.kubenet
+      IP.0 = 192.168.100.214
+
+  - name: worker3
+    <<: *DN
+    common_name: system:node:worker3
+    organization: system:nodes
+    san: |
+      DNS.0 = worker3
+      DNS.1 = worker3.kubenet
+      IP.0 = 192.168.100.215
+  
+  - name: kube-scheduler
+    <<: *DN
+    common_name: system:kube-scheduler
+    organization: system:kube-scheduler
+    san: |
+      DNS.0 = kube-scheduler
+      IP.0 = 127.0.0.1
+  
+  - name: kube-controller-manager
+    <<: *DN
+    common_name: system:kube-controller-manager
+    organization: system:kube-controller-manager
+    san: |
+      DNS.0 = kube-controller-manager
+      IP.0 = 127.0.0.1
+  
+  - name: kube-proxy
+    <<: *DN
+    common_name: system:kube-proxy
+    organization: system:node-proxier
+    san: |
+      DNS.0 = kube-proxy
+      IP.0 = 127.0.0.1
+
+create_ca_cert_client_entities:
+  - name: admin
+    <<: *DN
+    common_name: admin
+    organization: system:masters
+  
+  - name: service-accounts
+    <<: *DN
+    common_name: service-accounts

@@ -1,0 +1,26 @@
+- name: Install Control Plane Components
+  hosts: control*
+  become: true
+  vars_files:
+    - certificate.yml
+    - kubecontrol.yml
+  tasks:
+    # - name: Download Required Binaries
+    #   delegate_to: localhost
+    #   become: false
+    #   ansible.builtin.import_role:
+    #     name: install_kube_control_plane
+    #     tasks_from: download_binaries.yml
+
+    - name: Install Control Nodes
+      become: true
+      ansible.builtin.import_role:
+        name: install_kube_control_plane
+        tasks_from: install_binaries.yml
+
+    # - name: Generate Systemd Unit Files
+    #   delegate_to: localhost
+    #   run_once: true
+    #   ansible.builtin.import_role:
+    #     name: install_kube_control_plane
+    #     tasks_from: generate_unit_files.yml

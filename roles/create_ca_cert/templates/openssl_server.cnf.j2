@@ -1,0 +1,25 @@
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_req
+prompt              = no
+
+[ req_distinguished_name ]
+commonName                      = {{ create_ca_cert_params.common_name }}
+countryName                     = {{ create_ca_cert_params.country }}
+stateOrProvinceName             = {{ create_ca_cert_params.state }}
+localityName                    = {{ create_ca_cert_params.locality }}
+0.organizationName              = {{ create_ca_cert_params.organization }}
+organizationalUnitName          = {{ create_ca_cert_params.org_unit }}
+
+[ v3_req ]
+subjectKeyIdentifier = hash
+basicConstraints     = CA:false
+keyUsage             = critical, digitalSignature, keyEncipherment
+extendedKeyUsage     = clientAuth, serverAuth
+subjectAltName       = @server_alt_names
+
+[server_alt_names]
+{{ create_ca_cert_san }}

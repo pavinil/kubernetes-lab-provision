@@ -1,0 +1,13 @@
+---
+# defaults file for roles/create_root_ca
+create_ca_cert_output_location: "{{ undef(hint='You must specify destination directory') }}"
+create_ca_cert_root_name: "{{ undef(hint='You must specify root CA name') }}"
+create_ca_cert_params:
+  common_name: "{{ undef(hint='You must specify common name') }}"
+  country: "{{ undef(hint='You must specify country') }}"
+  state: "{{ undef(hint='You must specify state') }}"
+  locality: "{{ undef(hint='You must specify locality') }}"
+  organization: "{{ undef(hint='You must specify organization') }}"
+  org_unit: "{{ undef(hint='You must specify organization unit') }}"
+create_ca_cert_directory_name: "{{ undef(hint='You must specify directory name') }}"
+create_ca_cert_san: "{{ undef(hint='You must specify san') }}"

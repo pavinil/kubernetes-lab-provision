@@ -1,0 +1,50 @@
+---
+# tasks file for roles/create_root_ca
+- name: Create Folder
+  ansible.builtin.file:
+    path: "{{ create_ca_cert_output_location }}/root"
+    state: directory
+    mode: "700"
+  
+- name: Verify If Certs Exist
+  ansible.builtin.find: 
+    paths:
+      - "{{ create_ca_cert_output_location }}/root"
+    patterns:
+      - "*.crt"
+      - "*.key"
+  register: matched_files
+
+- name: Generate Root Certificate
+  when: matched_files.files | map(attribute='path') | list | length != 2
+  block:
+    - name: Generate Root Openssl Config File
+      ansible.builtin.template:
+        src: "{{ role_path }}/templates/openssl_root.cnf.j2"
+        dest: "{{ role_path }}/files/openssl_root.cnf"
+        mode: "0700"
+
+    - name: Generate Root CA Private Key
+      ansible.builtin.command:
+        cmd: >
+          openssl genrsa -out "{{ create_ca_cert_output_location }}/root/{{ create_ca_cert_root_name }}.key" 4096
+      register: output
+      failed_when: output.rc != 0
+      changed_when: output.rc != 0
+
+    - name: Generate Root CA Certificate
+      ansible.builtin.command:
+        cmd: >
+          openssl req
+          -new
+          -x509
+          -nodes
+          -config {{ role_path }}/files/openssl_root.cnf
+          -key {{ create_ca_cert_output_location }}/root/{{ create_ca_cert_root_name }}.key
+          -days 3650
+          -sha256
+          -extensions v3_ca
+          -out {{ create_ca_cert_output_location }}/root/{{ create_ca_cert_root_name }}.crt
+      register: output
+      failed_when: output.rc != 0
+      changed_when: output.rc != 0

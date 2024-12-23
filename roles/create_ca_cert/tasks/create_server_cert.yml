@@ -1,0 +1,59 @@
+- name: Create Folder
+  ansible.builtin.file:
+    path: "{{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}"
+    state: directory
+    mode: "700"
+
+- name: Verify If Certs Exist
+  ansible.builtin.find:
+    paths:
+      - "{{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}"
+    patterns:
+      - "*.crt"
+      - "*.key"
+      - "*.csr"
+  register: matched_files
+
+- name: Generate Server Certificates
+  when: matched_files.files | map(attribute='path') | list | length != 3
+  block:
+    - name: Generate Server Config File
+      vars:
+        create_ca_cert_type: server
+      ansible.builtin.template:
+        src: "{{ role_path }}/templates/openssl_server.cnf.j2"
+        dest: "{{ role_path }}/files/openssl_{{ create_ca_cert_directory_name }}.cnf"
+        mode: "0700"
+
+    - name: Generate Server Private Key
+      ansible.builtin.command:
+        cmd: >
+          openssl genrsa -out {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.key 2048
+      register: output
+      failed_when: output.rc != 0
+      changed_when: output.rc != 0
+
+    - name: Create Certificate Signing Request
+      ansible.builtin.command:
+        cmd: >
+          openssl req -config {{ role_path }}/files/openssl_{{ create_ca_cert_directory_name }}.cnf
+          -key {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.key
+          -new -sha256 -out {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.csr
+      register: output
+      failed_when: output.rc != 0
+      changed_when: output.rc != 0
+
+    - name: Generate Certificate
+      ansible.builtin.command:
+        cmd: >
+          openssl x509 -req -days 3653
+          -in {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.csr
+          -extensions v3_req
+          -sha256 -CA {{ create_ca_cert_output_location }}/root/{{ create_ca_cert_root_name }}.crt
+          -CAkey {{ create_ca_cert_output_location }}/root/{{ create_ca_cert_root_name }}.key
+          -CAcreateserial
+          -extfile {{ role_path }}/files/openssl_{{ create_ca_cert_directory_name }}.cnf
+          -out {{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.crt
+      register: output
+      failed_when: output.rc != 0
+      changed_when: output.rc != 0

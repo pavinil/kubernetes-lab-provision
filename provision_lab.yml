@@ -1,0 +1,103 @@
+---
+- name: Generate Inventory File
+  hosts: localhost
+  vars_files:
+    - /home/nilov/kubernetes-qemu-lab/plays/infra/vars/vm_vars.yml
+    - /home/nilov/kubernetes-qemu-lab/plays/infra/vars/network_vars.yml
+  tasks:
+    - name: Generate Inventory File From VMs
+      block:
+        - name: Create Inventory File
+          ansible.builtin.copy:
+            dest: "inventory.ini"
+            content: "[libvirt_vms]\n"
+            mode: "0644"
+
+        - name: Populate Inventory File
+          ansible.builtin.lineinfile:
+            path: "inventory.ini"
+            line: >
+              {{ item.name }} ansible_host={{ item.ip_address }} ansible_user={{ create_libvirt_vm_username }}
+              hostname={{ item.name }}.{{ create_libvirt_network_domain_name }}
+            create: true
+            mode: "0644"
+          loop: "{{ create_libvirt_vm_node_list }}"
+
+- name: Initial Setup
+  become: true
+  hosts: libvirt_vms
+  tasks:
+    - name: Update APT cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Ensure qemu-guest-agent service is enabled and started
+      ansible.builtin.service:
+        name: qemu-guest-agent
+        state: started
+        enabled: true
+
+    - name: Run Dhclient
+      ansible.builtin.command:
+        cmd: >
+          dhclient -4
+      register: output
+      changed_when: output.rc != 0
+
+    - name: Mount Shared Directory
+      ansible.posix.mount:
+        path: /mnt/libvirt
+        src: shared_mount
+        fstype: virtiofs
+        state: mounted
+
+    # - name: Set Hostname
+    #   ansible.builtin.hostname:
+    #     name: "{{ hostname }}"
+    #     use: debian
+
+    # - name: Verify qemu-guest-agent installation
+    #   ansible.builtin.shell: |
+    #     systemctl is-active qemu-guest-agent
+    #   register: qemu_guest_agent_status
+    #   failed_when: qemu_guest_agent_status.stdout != "active"
+    #   changed_when: false
+    #   ignore_errors: true
+
+    # - name: Debug qemu-guest-agent status
+    #   ansible.builtin.debug:
+    #     msg: "QEMU Guest Agent status: {{ qemu_guest_agent_status.stdout }}"
+
+    # - name: Print Dhclient Output
+    #   ansible.builtin.debug:
+    #     msg: "{{ output }}"
+# - name: Provision Gateway VM
+#   hosts: gateway*
+#   become: true
+#   tasks:
+#     - name: Add repo using key from URL
+#       ansible.builtin.deb822_repository:
+#         name: haproxy
+#         types: deb
+#         uris: http://haproxy.debian.net
+#         suites: "bookworm-backports-3.0"
+#         components: main
+#         architectures: amd64
+#         signed_by: https://haproxy.debian.net/bernat.debian.org.gpg
+
+#     - name: Update APT cache
+#       become: true
+#       ansible.builtin.command:
+#         cmd: apt update
+#       register: output
+#       changed_when: output.rc != 0
+
+#     - name: Install LB Packages
+#       ansible.builtin.apt:
+#         name:
+#           - haproxy=3.0*
+#           - ipvsadm
+#           - ldirectord
+#           - keepalived
+#         state: present

@@ -1,0 +1,37 @@
+# - name: Transfer etcd Files To Control Planes
+#   ansible.builtin.copy:
+#     src: "{{ install_kube_control_plane_binary_location }}/etcd/{{ item }}"
+#     dest: /usr/local/bin/
+#     mode: "0777"
+#   loop:
+#     - etcd
+#     - etcdctl
+#     - etcdutl
+  
+# - name: Transfer Kube Control Plane Components
+#   ansible.builtin.copy: 
+#     src: "{{ install_kube_control_plane_binary_location }}/{{ item }}"
+#     dest: /usr/local/bin/
+#     mode: "0777"
+#   loop: 
+#     - kube-apiserver
+#     - kube-controller-manager
+#     - kube-scheduler
+
+- name: Generate Etcd Unit File
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/etcd.service.j2"
+    dest: /etc/systemd/system/etcd.service
+    mode: '755'
+
+- name: Start etcd Service
+  ansible.builtin.systemd_service:
+    name: etcd
+    daemon_reload: true
+    enabled: true
+    state: started
+  register: output
+
+- name: Ensure Service Status is Running
+  ansible.builtin.debug:
+    msg: "{{ output.status }}"

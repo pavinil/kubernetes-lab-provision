@@ -1,0 +1,10 @@
+---
+# defaults file for roles/install_kube_control_plane
+install_kube_control_plane_kubernetes_version: "{{ undef(hint='You must specify kubernetes version') }}"
+install_kube_control_plane_kubernetes_download_url: "https://dl.k8s.io/release/v{{ install_kube_control_plane_kubernetes_version }}/bin/linux/amd64"
+install_kube_control_plane_etcd_version: "{{ undef(hint='You must specify etcd version') }}"
+install_kube_control_plane_etcd_download_url:
+  "https://github.com/etcd-io/etcd/releases/download/\
+  v{{- install_kube_control_plane_etcd_version -}}/\
+  etcd-v{{- install_kube_control_plane_etcd_version -}}-linux-amd64.tar.gz"
+install_kube_control_plane_binary_location: "{{ undef(hint='You must specify binary download location') }}"

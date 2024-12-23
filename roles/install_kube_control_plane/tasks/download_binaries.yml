@@ -1,0 +1,32 @@
+---
+# tasks file for roles/install_kube_control_plane
+- name: Download etcd Binary
+  ansible.builtin.get_url:
+    url: "{{ install_kube_control_plane_etcd_download_url }}"
+    dest: "{{ install_kube_control_plane_binary_location }}"
+    mode: "0755"
+  register: download_info
+
+- name: Create etc Output Directory
+  ansible.builtin.file:
+    path: "{{ install_kube_control_plane_binary_location }}/etcd"
+    state: directory
+    mode: "0755"
+
+- name: Untar etcd
+  ansible.builtin.command:
+    cmd: >
+      tar -xvf {{ download_info.dest }} --strip-components=1 -C {{ install_kube_control_plane_binary_location }}/etcd
+  register: output
+  changed_when: output.rc != 0
+
+- name: Download Kubernetes Binary
+  ansible.builtin.get_url:
+    url: "{{ install_kube_control_plane_kubernetes_download_url }}/{{ item }}"
+    dest: "{{ install_kube_control_plane_binary_location }}"
+    mode: "0755"
+  register: download_info
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler

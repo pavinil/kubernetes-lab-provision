@@ -1,0 +1,143 @@
+- name: Generate Required Kubernetes Certificates and Config
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - certificate.yml
+  tasks:
+    - name: Check If Certificate Location Exists
+      ansible.builtin.stat:
+        path: "{{ create_ca_cert_output_location }}"
+      register: stat_details
+
+    - name: Create Certificate Directory If Not Created
+      ansible.builtin.file:
+        path: "{{ create_ca_cert_output_location }}"
+        state: directory
+        mode: "700"
+      when: not stat_details.stat.exists
+
+    - name: Generate Root CA
+      ansible.builtin.include_role:
+        name: create_ca_cert
+        tasks_from: create_root_ca_cert.yml
+
+    - name: Generate Server Certificates
+      vars:
+        create_ca_cert_directory_name: "{{ item.name }}"
+        create_ca_cert_params:
+          common_name: "{{ item.common_name }}"
+          country: "{{ item.country }}"
+          state: "{{ item.state }}"
+          locality: "{{ item.locality }}"
+          organization: "{{ item.organization }}"
+          org_unit: "{{ item.org_unit }}"
+        create_ca_cert_san: "{{ item.san }}"
+      ansible.builtin.include_role:
+        name: create_ca_cert
+        tasks_from: create_server_cert.yml
+      loop: "{{ create_ca_cert_server_entities }}"
+
+    - name: Generate Client Certificates
+      vars:
+        create_ca_cert_directory_name: "{{ item.name }}"
+        create_ca_cert_params:
+          common_name: "{{ item.common_name }}"
+          country: "{{ item.country }}"
+          state: "{{ item.state }}"
+          locality: "{{ item.locality }}"
+          organization: "{{ item.organization }}"
+          org_unit: "{{ item.org_unit }}"
+        create_ca_cert_san: "{{ item.san }}"
+      ansible.builtin.include_role:
+        name: create_ca_cert
+        tasks_from: create_client_cert.yml
+      loop: "{{ create_ca_cert_client_entities }}"
+
+    - name: Generate Kube Config
+      vars:
+        create_ca_cert_directory_name: "{{ item.name }}"
+        create_ca_cert_params:
+          common_name: "{{ item.common_name }}"
+      ansible.builtin.include_role:
+        name: create_ca_cert
+        tasks_from: create_kube_context.yml
+      loop: "{{ create_ca_cert_client_entities + create_ca_cert_server_entities }}"
+
+    - name: Generate random base64-encoded key
+      ansible.builtin.command: "openssl rand -base64 32"
+      register: random_key
+      changed_when: false
+
+    - name: Create EncryptionConfig YAML
+      ansible.builtin.copy:
+        dest: "{{ create_ca_cert_output_location }}/encryption-config.yaml"
+        content: |
+          kind: EncryptionConfig
+          apiVersion: v1
+          resources:
+            - resources:
+                - secrets
+              providers:
+                - aescbc:
+                    keys:
+                      - name: key1
+                        secret: "{{ random_key.stdout }}"
+                - identity: {}
+        mode: "0700"
+
+- name: Transfer Certificates and Config to Nodes
+  become: true
+  hosts: libvirt_vms
+  vars_files:
+    - certificate.yml
+  tasks:
+    - name: Transfer etcd Certificates
+      when: inventory_hostname is match('^(control.*)$')
+      ansible.builtin.copy:
+        dest: /etc/etcd/
+        src: "{{ create_ca_cert_output_location }}/kube-api-server/"
+        mode: "0644"
+
+    - name: Transfer Kubelet Certificates
+      when: inventory_hostname is match('^(control.*|worker.*)$')
+      ansible.builtin.copy:
+        dest: /var/lib/kubelet/
+        src: "{{ create_ca_cert_output_location }}/{{ inventory_hostname }}/"
+        mode: "0644"
+
+    - name: Transfer Kube Proxy Config
+      when: inventory_hostname is match('^(worker.*)$')
+      ansible.builtin.copy:
+        dest: /var/lib/kubelet/kube-proxy.kubeconfig
+        src: "{{ create_ca_cert_output_location }}/kube-proxy/kube-proxy.kubeconfig"
+        mode: "0644"
+
+    - name: Create Kubernetes Folder In Control Nodes
+      ansible.builtin.file:
+        path: /var/lib/kubernetes/
+        state: directory
+        mode: "0755"
+      when: inventory_hostname is match('^(control.*)$')
+
+    - name: Gather Control Node Files
+      delegate_to: localhost
+      become: false
+      ansible.builtin.find:
+        paths:
+          - "{{ create_ca_cert_output_location }}/"
+        patterns:
+          - kube.*\.(crt|key|kubeconfig)
+          - service-.*\.(crt|key)
+          - encryption-config.yaml
+          - admin.kubeconfig
+        use_regex: true
+        recurse: true
+      register: control_node_files
+
+    - name: Transfer Files to Control Nodes
+      when: inventory_hostname is match('^(control.*)$')
+      ansible.builtin.copy:
+        dest: "/var/lib/kubernetes/{{ item.split('/') | last }}"
+        src: "{{ item }}/"
+        mode: "0755"
+      loop: "{{ control_node_files.files | map(attribute='path') | list }}"
