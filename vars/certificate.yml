@@ -1,4 +1,4 @@
-create_ca_cert_output_location: certificates
+create_ca_cert_output_location: /home/nilov/libvirt_shared
 create_ca_cert_kube_cluster_name: kubenet
 create_ca_cert_root_name: kube-root-ca
 create_ca_cert_params: &DN
@@ -10,9 +10,9 @@ create_ca_cert_params: &DN
   org_unit: Kubenet
 
 create_ca_cert_server_entities:
-  - name: kube-api-server
+  - name: kube-apiserver
     <<: *DN
-    common_name: kube-api-server
+    common_name: kube-apiserver
     organization: Kubernetes
     san: |
       DNS.0 = kubernetes

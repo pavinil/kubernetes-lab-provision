@@ -3,24 +3,30 @@
   become: true
   vars_files:
     - certificate.yml
-    - kubecontrol.yml
+    - kubecomponents.yml
   tasks:
-    # - name: Download Required Binaries
+    # - name: Download Required Binaries # noqa: run-once[task]
     #   delegate_to: localhost
+    #   run_once: true
     #   become: false
     #   ansible.builtin.import_role:
-    #     name: install_kube_control_plane
+    #     name: install_kube_components
     #     tasks_from: download_binaries.yml
 
-    - name: Install Control Nodes
+    # - name: Install Etcd
+    #   become: true
+    #   ansible.builtin.import_role:
+    #     name: install_kube_components
+    #     tasks_from: install_etcd.yml
+
+    - name: Install Kube Control Plane Components
       become: true
       ansible.builtin.import_role:
-        name: install_kube_control_plane
-        tasks_from: install_binaries.yml
+        name: install_kube_components
+        tasks_from: install_kube_control_components.yml
 
     # - name: Generate Systemd Unit Files
     #   delegate_to: localhost
-    #   run_once: true
     #   ansible.builtin.import_role:
-    #     name: install_kube_control_plane
+    #     name: install_kube_components
     #     tasks_from: generate_unit_files.yml

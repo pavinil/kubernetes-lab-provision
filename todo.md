@@ -1,0 +1,4 @@
+- [x] Symbolic link to certs in /var/lib/kubernetes
+- [ ] Install etcd in control nodes
+- [ ] Install kube controller manager in control nodes
+- [ ] Install kube scheduler in control nodes

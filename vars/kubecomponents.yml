@@ -1,0 +1,9 @@
+install_kube_components_kubernetes_version: "1.31.0"
+install_kube_components_etcd_version: "3.5.15"
+install_kube_components_cri_version: "1.31.1"
+install_kube_components_runc_version: "1.1.13"
+install_kube_components_containerd_version: "1.7.20"
+install_kube_components_cni_plugins_version: "1.5.1"
+install_kube_components_cni_spec_version: "1.0.0"
+install_kube_components_binary_location_host: /home/nilov/libvirt_shared
+install_kube_components_binary_location_guest: /mnt/libvirt

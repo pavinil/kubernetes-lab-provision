@@ -1,3 +1,0 @@
-install_kube_control_plane_kubernetes_version: "1.30.0"
-install_kube_control_plane_etcd_version: "3.5.15"
-install_kube_control_plane_binary_location: "/home/nilov/kubernetes-lab/binaries"

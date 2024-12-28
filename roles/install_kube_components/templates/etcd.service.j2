@@ -8,10 +8,10 @@ Type=notify
 Environment=ETCD_UNSUPPORTED_ARCH=amd64
 ExecStart=/usr/local/bin/etcd \
   --name {{ hostname.split('.') | first }} \
-  --cert-file=/var/lib/kubernetes/kube-api-server.crt \
-  --key-file=/var/lib/kubernetes/kube-api-server.key \
-  --peer-cert-file=/var/lib/kubernetes/kube-api-server.crt \
-  --peer-key-file=/var/lib/kubernetes/kube-api-server.key \
+  --cert-file=/etc/etcd/kube-apiserver.crt \
+  --key-file=/etc/etcd/kube-apiserver.key \
+  --peer-cert-file=/etc/etcd/kube-apiserver.crt \
+  --peer-key-file=/etc/etcd/kube-apiserver.key \
   --trusted-ca-file=/var/lib/kubernetes/kube-root-ca.crt \
   --peer-trusted-ca-file=/var/lib/kubernetes/kube-root-ca.crt \
   --peer-client-cert-auth \

@@ -95,7 +95,7 @@
       when: inventory_hostname is match('^(control.*)$')
       ansible.builtin.copy:
         dest: /etc/etcd/
-        src: "{{ create_ca_cert_output_location }}/kube-api-server/"
+        src: "{{ create_ca_cert_output_location }}/kube-apiserver/"
         mode: "0644"
 
     - name: Transfer Kubelet Certificates

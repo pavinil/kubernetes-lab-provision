@@ -1,0 +1,18 @@
+---
+# defaults file for roles/install_kube_components
+install_kube_components_kubernetes_version: "{{ undef(hint='You must specify kubernetes version') }}"
+install_kube_components_etcd_version: "{{ undef(hint='You must specify etcd version') }}"
+install_kube_components_cri_version: "{{ undef(hint='You must specify cri version') }}"
+install_kube_components_runc_version: "{{ undef(hint='You must specify runc version') }}"
+install_kube_components_containerd_version: "{{ undef(hint='You must specify containerd version') }}"
+install_kube_components_cni_plugins_version: "{{ undef(hint='You must specify cni plugin version') }}"
+
+install_kube_components_kubernetes_download_url: "https://dl.k8s.io/release/v{{ install_kube_components_kubernetes_version }}/bin/linux/amd64"
+install_kube_components_etcd_download_url: "https://github.com/etcd-io/etcd/releases/download/v{{ install_kube_components_etcd_version }}/etcd-v{{ install_kube_components_etcd_version }}-linux-amd64.tar.gz"
+install_kube_components_containerd_download_url: "https://github.com/containerd/containerd/releases/download/v{{ install_kube_components_containerd_version }}/containerd-{{ install_kube_components_containerd_version }}-linux-amd64.tar.gz"
+install_kube_components_runc_download_url: "https://github.com/opencontainers/runc/releases/download/v{{ install_kube_components_runc_version }}/runc.amd64"
+install_kube_components_crictl_download_url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/v{{ install_kube_components_cri_version }}/crictl-v{{ install_kube_components_cri_version }}-linux-amd64.tar.gz"
+install_kube_components_cni_plugin: "https://github.com/containernetworking/plugins/releases/download/v{{ install_kube_components_cni_plugins_version }}/cni-plugins-linux-amd64-v{{ install_kube_components_cni_plugins_version }}.tgz"
+
+install_kube_components_binary_location_host: "{{ undef(hint='You must specify binary download location in host') }}"
+install_kube_components_binary_location_guest: "{{ undef(hint='You must specify binary location in guest') }}"
