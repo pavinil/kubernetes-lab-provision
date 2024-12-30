@@ -1,0 +1,45 @@
+- name: Install Containerd Binaries
+  ansible.builtin.find:
+    paths: "{{ install_kube_components_binary_location_guest }}/containerd"
+    file_type: file
+    recurse: false
+  register: executables
+
+- name: Create symbolic links in /usr/local/bin
+  ansible.builtin.file:
+    src: "{{ item.path }}"
+    dest: "/usr/local/bin/{{ item.path | basename }}"
+    state: link
+  loop: "{{ executables.files }}"
+
+- name: Install Runc
+  ansible.builtin.file:
+    src: "{{ install_kube_components_binary_location_guest }}/runc.amd64"
+    dest: "/usr/local/bin/runc"
+    state: link
+
+- name: Create containerd etc folder
+  ansible.builtin.file:
+    path: /etc/containerd/
+    state: directory
+    mode: '0755'
+
+- name: Transfer Containerd Config
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/containerd.config.toml.j2"
+    dest: /etc/containerd/containerd.config.toml
+    mode: '0755'
+
+- name: Generate Containerd Unit File
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/containerd.service.j2"
+    dest: "/etc/systemd/system/containerd.service"
+    mode: '0755'
+
+- name: Start Service - Containerd
+  ansible.builtin.systemd_service:
+    name: containerd
+    daemon_reload: true
+    enabled: true
+    state: started
+

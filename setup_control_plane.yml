@@ -19,14 +19,13 @@
     #     name: install_kube_components
     #     tasks_from: install_etcd.yml
 
-    - name: Install Kube Control Plane Components
-      become: true
-      ansible.builtin.import_role:
-        name: install_kube_components
-        tasks_from: install_kube_control_components.yml
-
-    # - name: Generate Systemd Unit Files
-    #   delegate_to: localhost
+    # - name: Install Kube Control Plane Components
+    #   become: true
     #   ansible.builtin.import_role:
     #     name: install_kube_components
-    #     tasks_from: generate_unit_files.yml
+    #     tasks_from: install_kube_control_components.yml
+
+    - name: Install Container Runtimes
+      ansible.builtin.import_role:
+        name: install_kube_components
+        tasks_from: install_container_runtime_binaries.yml

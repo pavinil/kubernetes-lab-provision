@@ -89,6 +89,12 @@
     mode: "0755"
   register: download_info
 
+- name: Create Kubelet Directory
+  ansible.builtin.file:
+    path: "{{ install_kube_components_binary_location_host }}/kubelet"
+    state: directory
+    mode: "0755"
+
 - name: Download Kubernetes Binary
   ansible.builtin.get_url:
     url: "{{ install_kube_components_kubernetes_download_url }}/{{ item }}"
