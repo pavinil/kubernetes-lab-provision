@@ -1,0 +1,16 @@
+- name: Install Worker Plane Components
+  hosts: worker*
+  become: true
+  vars_files:
+    - certificate.yml
+    - kubecomponents.yml
+  tasks:
+    # - name: Install Container Runtimes
+    #   ansible.builtin.import_role:
+    #     name: install_kube_components
+    #     tasks_from: install_container_runtime_binaries.yml
+
+    - name: Install Kubelet
+      ansible.builtin.import_role:
+        name: install_kube_components
+        tasks_from: install_kubelet.yml

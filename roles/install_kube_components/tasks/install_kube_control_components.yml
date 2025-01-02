@@ -8,9 +8,6 @@
     - kube-apiserver
     - kube-controller-manager
     - kube-scheduler
-    - kube-proxy
-    - kubelet
-
 
 - name: Create kubernetes etc folder
   ansible.builtin.file:

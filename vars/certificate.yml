@@ -1,4 +1,5 @@
 create_ca_cert_output_location: /home/nilov/libvirt_shared
+create_ca_cert_node_mount_location: /mnt/libvirt
 create_ca_cert_kube_cluster_name: kubenet
 create_ca_cert_root_name: kube-root-ca
 create_ca_cert_params: &DN

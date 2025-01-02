@@ -91,6 +91,19 @@
   vars_files:
     - certificate.yml
   tasks:
+    - name: Load Kube Root CA to All Nodes
+      ansible.builtin.file:
+        src: "{{ create_ca_cert_node_mount_location }}/root/kube-root-ca.crt"
+        dest: /usr/local/share/ca-certificates/kube-root-ca.crt
+        state: link
+
+    - name: Load CA Certs
+      ansible.builtin.command:
+        cmd: >
+          update-ca-certificates
+      register: output
+      changed_when: output.rc != 0
+
     - name: Transfer etcd Certificates
       when: inventory_hostname is match('^(control.*)$')
       ansible.builtin.copy:
@@ -112,12 +125,12 @@
         src: "{{ create_ca_cert_output_location }}/kube-proxy/kube-proxy.kubeconfig"
         mode: "0644"
 
-    - name: Create Kubernetes Folder In Control Nodes
+    - name: Create Kubernetes Folder In Control and Worker Nodes
       ansible.builtin.file:
         path: /var/lib/kubernetes/
         state: directory
         mode: "0755"
-      when: inventory_hostname is match('^(control.*)$')
+      when: inventory_hostname is match('^(control.*|worker.*)$')
 
     - name: Gather Control Node Files
       delegate_to: localhost
