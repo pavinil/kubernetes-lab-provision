@@ -19,7 +19,7 @@
 
 - name: Start Service - Kubelet
   ansible.builtin.systemd_service:
-    name: kubelet
+    name: Kubelet
     daemon_reload: true
     enabled: true
     state: started
