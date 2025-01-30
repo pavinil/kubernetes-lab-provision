@@ -21,6 +21,11 @@
         name: create_ca_cert
         tasks_from: create_root_ca_cert.yml
 
+    - name: Generate Front Proxy Root CA
+      ansible.builtin.include_role:
+        name: create_ca_cert
+        tasks_from: create_fp_ca_cert.yml
+
     - name: Generate Server Certificates
       vars:
         create_ca_cert_directory_name: "{{ item.name }}"
@@ -52,6 +57,20 @@
         name: create_ca_cert
         tasks_from: create_client_cert.yml
       loop: "{{ create_ca_cert_client_entities }}"
+
+    - name: Generate Front Proxy Client Certificate
+      vars:
+        create_ca_cert_directory_name: front-proxy-client
+        create_ca_cert_params:
+          common_name: front-proxy-client
+          country: IN
+          state: Tamilnadu
+          locality: Chennai
+          organization: Kubernetes
+          org_unit: Kubenet
+      ansible.builtin.include_role:
+        name: create_ca_cert
+        tasks_from: create_fp_client_cert.yml
 
     - name: Generate Kube Config
       vars:
@@ -143,6 +162,7 @@
           - service-.*\.(crt|key)
           - encryption-config.yaml
           - admin.kubeconfig
+          - front-proxy-.*\.(crt|key)
         use_regex: true
         recurse: true
       register: control_node_files

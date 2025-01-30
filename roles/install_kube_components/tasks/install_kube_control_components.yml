@@ -1,13 +1,13 @@
-- name: Install Kube Control Plane Components
-  ansible.builtin.file:
-    src: "{{ install_kube_components_binary_location_guest }}/{{ item }}/{{ item }}"
-    dest: "/usr/local/bin/{{ item }}"
-    state: link
-    mode: "0777"
-  loop:
-    - kube-apiserver
-    - kube-controller-manager
-    - kube-scheduler
+# - name: Install Kube Control Plane Components
+#   ansible.builtin.file:
+#     src: "{{ install_kube_components_binary_location_guest }}/{{ item }}/{{ item }}"
+#     dest: "/usr/local/bin/{{ item }}"
+#     state: link
+#     mode: "0777"
+#   loop:
+#     - kube-apiserver
+#     - kube-controller-manager
+#     - kube-scheduler
 
 - name: Create kubernetes etc folder
   ansible.builtin.file:

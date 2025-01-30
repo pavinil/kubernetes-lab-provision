@@ -1,5 +1,5 @@
 create_ca_cert_output_location: /home/nilov/libvirt_shared
-create_ca_cert_node_mount_location: /mnt/shared
+create_ca_cert_node_mount_location: /mnt/libvirt
 create_ca_cert_kube_cluster_name: kubenet
 create_ca_cert_root_name: kube-root-ca
 create_ca_cert_params: &DN
@@ -11,8 +11,8 @@ create_ca_cert_params: &DN
   org_unit: Kubenet
 
 create_ca_cert_fp_root_name: kube-fp-ca
-create_ca_cert_fp_params: &FP-DN
-  common_name: KuberootFP
+create_ca_cert_fp_params: &DN
+  common_name: Kuberoot-fp
   country: IN
   state: Tamilnadu
   locality: Chennai
@@ -35,47 +35,68 @@ create_ca_cert_server_entities:
       DNS.7 = control1.kubenet
       DNS.8 = control2
       DNS.9 = control2.kubenet
-      IP.0 = 10.96.0.1
-      IP.1 = 192.168.100.2
-      IP.2 = 192.168.100.3
-      IP.3 = 192.168.100.100
-      IP.4 = 127.0.0.1
+      DNS.10 = control3.kubenet
+      DNS.11 = control3
+      IP.0 = 10.32.0.1
+      IP.1 = 192.168.100.100
+      IP.2 = 192.168.100.210
+      IP.3 = 192.168.100.211
+      IP.4 = 192.168.100.212
+      IP.5 = 127.0.0.1
 
   - name: control1
     <<: *DN
-    common_name: system:node:control1.kubenet
+    common_name: system:node:control1
     organization: system:nodes
     san: |
       DNS.0 = control1
       DNS.1 = control1.kubenet
-      IP.0 = 192.168.100.2
+      IP.0 = 192.168.100.210
   
   - name: control2
     <<: *DN
-    common_name: system:node:control2.kubenet
+    common_name: system:node:control2
     organization: system:nodes
     san: |
       DNS.0 = control2
       DNS.1 = control2.kubenet
-      IP.0 = 192.168.100.3
+      IP.0 = 192.168.100.211
+
+  - name: control3
+    <<: *DN
+    common_name: system:node:control3
+    organization: system:nodes
+    san: |
+      DNS.0 = control3
+      DNS.1 = control3.kubenet
+      IP.0 = 192.168.100.212
 
   - name: worker1
     <<: *DN
-    common_name: system:node:worker1.kubenet
+    common_name: system:node:worker1
     organization: system:nodes
     san: |
       DNS.0 = worker1
       DNS.1 = worker1.kubenet
-      IP.0 = 192.168.100.4
+      IP.0 = 192.168.100.213
   
   - name: worker2
     <<: *DN
-    common_name: system:node:worker2.kubenet
+    common_name: system:node:worker2
     organization: system:nodes
     san: |
       DNS.0 = worker2
       DNS.1 = worker2.kubenet
-      IP.0 = 192.168.100.5
+      IP.0 = 192.168.100.214
+
+  - name: worker3
+    <<: *DN
+    common_name: system:node:worker3
+    organization: system:nodes
+    san: |
+      DNS.0 = worker3
+      DNS.1 = worker3.kubenet
+      IP.0 = 192.168.100.215
   
   - name: kube-scheduler
     <<: *DN
@@ -110,3 +131,10 @@ create_ca_cert_client_entities:
   - name: service-accounts
     <<: *DN
     common_name: service-accounts
+  
+  - name: front-proxy-client
+    <<: *DN
+    common_name: front-proxy-client
+    organization: Kubernetes
+    san: |
+      DNS.0 = front-proxy-client

@@ -16,7 +16,7 @@ resolvConf: "/run/systemd/resolve/resolv.conf"
 runtimeRequestTimeout: "15m"
 tlsCertFile: "/var/lib/kubelet/{{ inventory_hostname }}.crt"
 tlsPrivateKeyFile: "/var/lib/kubelet/{{ inventory_hostname }}.key"
-containerRuntimeEndpoint: "unix:///var/run/containerd/containerd.sock"
+containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
 cgroupDriver: "systemd"
 {% if 'control' in inventory_hostname %}
 registerWithTaints:

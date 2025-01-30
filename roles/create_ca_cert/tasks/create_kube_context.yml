@@ -30,7 +30,7 @@
     - name: Set Credentials
       ansible.builtin.command:
         cmd: >
-          kubectl config set-credentials {{ create_ca_cert_directory_name }}
+          kubectl config set-credentials {{ create_ca_cert_params.common_name }}
           --client-certificate={{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.crt
           --client-key={{ create_ca_cert_output_location }}/{{ create_ca_cert_directory_name }}/{{ create_ca_cert_directory_name }}.key
           --embed-certs=true

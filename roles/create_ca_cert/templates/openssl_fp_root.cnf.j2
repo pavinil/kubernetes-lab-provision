@@ -1,0 +1,42 @@
+[ca]
+default_ca = CA_default
+
+[CA_default]
+default_md        = sha256
+
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 3750
+preserve          = no
+policy            = policy_loose
+
+[ policy_loose ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_ca
+prompt              = no
+
+[ req_distinguished_name ]
+commonName                      = {{ create_ca_cert_fp_params.common_name }}
+countryName                     = {{ create_ca_cert_fp_params.country }}
+stateOrProvinceName             = {{ create_ca_cert_fp_params.state }}
+localityName                    = {{ create_ca_cert_fp_params.locality }}
+0.organizationName              = {{ create_ca_cert_fp_params.organization }}
+organizationalUnitName          = {{ create_ca_cert_fp_params.org_unit }}
+
+[ v3_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign

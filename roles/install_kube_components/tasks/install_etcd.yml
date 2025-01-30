@@ -1,13 +1,13 @@
-- name: Install etcd Binary To Control Planes
-  ansible.builtin.file:
-    src: "{{ install_kube_components_binary_location_guest }}/etcd/{{ item }}"
-    dest: "/usr/local/bin/{{ item }}"
-    state: link
-    mode: "0777"
-  loop:
-    - etcd
-    - etcdctl
-    - etcdutl
+# - name: Install etcd Binary To Control Planes
+#   ansible.builtin.file:
+#     src: "{{ install_kube_components_binary_location_guest }}/etcd/{{ item }}"
+#     dest: "/usr/local/bin/{{ item }}"
+#     state: link
+#     mode: "0777"
+#   loop:
+#     - etcd
+#     - etcdctl
+#     - etcdutl
 
 - name: Generate Etcd Unit File
   ansible.builtin.template:

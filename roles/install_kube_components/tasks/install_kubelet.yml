@@ -1,9 +1,9 @@
-- name: Install Kubelet Binary
-  ansible.builtin.file:
-    src: "{{ install_kube_components_binary_location_guest }}/kubelet/kubelet"
-    dest: "/usr/local/bin/kubelet"
-    state: link
-    mode: "0777"
+# - name: Install Kubelet Binary
+#   ansible.builtin.file:
+#     src: "{{ install_kube_components_binary_location_guest }}/kubelet/kubelet"
+#     dest: "/usr/local/bin/kubelet"
+#     state: link
+#     mode: "0777"
   
 - name: Transfer Kubelet Config
   ansible.builtin.template:
@@ -19,7 +19,7 @@
 
 - name: Start Service - Kubelet
   ansible.builtin.systemd_service:
-    name: Kubelet
+    name: kubelet.service
     daemon_reload: true
     enabled: true
     state: started

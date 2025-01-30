@@ -30,10 +30,10 @@
     #     name: install_kube_components
     #     tasks_from: install_container_runtime_binaries.yml
 
-    # - name: Install Kubelet
-    #   ansible.builtin.import_role:
-    #     name: install_kube_components
-    #     tasks_from: install_kubelet.yml
+    - name: Install Kubelet
+      ansible.builtin.import_role:
+        name: install_kube_components
+        tasks_from: install_kubelet.yml
 
     - name: Install Kube-Proxy
       ansible.builtin.import_role:

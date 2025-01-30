@@ -1,9 +1,9 @@
-- name: Install Kube-Proxy Binary
-  ansible.builtin.file:
-    src: "{{ install_kube_components_binary_location_guest }}/kube-proxy/kube-proxy"
-    dest: "/usr/local/bin/kube-proxy"
-    state: link
-    mode: "0777"
+# - name: Install Kube-Proxy Binary
+#   ansible.builtin.file:
+#     src: "{{ install_kube_components_binary_location_guest }}/kube-proxy/kube-proxy"
+#     dest: "/usr/local/bin/kube-proxy"
+#     state: link
+#     mode: "0777"
 
 - name: Create Kube-Proxy Directory
   ansible.builtin.file:
